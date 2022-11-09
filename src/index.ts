@@ -1,39 +1,21 @@
 import express from 'express';
 
-// config
+// config (import .env file)
+import dotenv from 'dotenv';
+dotenv.config({ encoding: 'utf8' });
 const config = {
-  port: 8528,
-  address: '0.0.0.0',
+  // WEBSERVER CONFIG
+  host: process.env.WAFFLE_HTTP_HOST || '0.0.0.0',
+  port: process.env.WAFFLE_HTTP_PORT || '5000',
 };
 
 const app = express();
 
-// import middlewares
-import { graphqlHTTP } from 'express-graphql';
-import graphql from 'graphql';
+// graphql route
+import graphqlRoute from './routes/graphql';
+app.use(await graphqlRoute());
 
-const exampleSchema = graphql.buildSchema(`
-type Query {
-  hello: String
-}
-`);
-
-app.use(
-  '/graphql',
-  graphqlHTTP({
-    schema: exampleSchema,
-    rootValue: {
-      hello: () => {
-        return 'Hello world!';
-      },
-    },
-    graphiql: true,
-  })
-);
-
-app.listen(config.port, config.address, () => {
-  console.log(
-    '[express]',
-    `Listening on http://${config.address}:${config.port}`
-  );
+app.listen(+config.port, config.host, () => {
+  const address = config.host == '0.0.0.0' ? 'localhost' : config.host;
+  console.log('[express]', `Listening on http://${address}:${config.port}`);
 });

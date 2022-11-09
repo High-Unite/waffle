@@ -1,6 +1,8 @@
-type EnrollmentCycle = 'March' | 'June' | 'September' | 'December';
+import type { WithId, Document } from 'mongodb';
 
-type HomeschoolHub =
+export type EnrollmentCycle = 'March' | 'June' | 'September' | 'December';
+
+export type HomeschoolHub =
   | 'Main (Ortigas)'
   | 'Middle East - Dubai'
   | 'Middle East - Abu Dhabi'
@@ -19,58 +21,97 @@ type HomeschoolHub =
   | 'Qatar'
   | 'Roces';
 
-interface Club {
+export interface Club {
   name: string;
-  url: string;
-  logoUrl: string;
+  id?: string;
 }
 
-interface LegacyData {
+// Club for GraphQL
+export interface RClub {
+  id?: any; // to be discussed
+  name: string;
+  // url: string;
+  // logoUrl: string;
+}
+
+export interface LegacyData {
   level: number;
-  hub: 'Main';
+  hub: 'Main' | string;
 }
 
-interface ContactData {
+export interface ContactData {
   phone: string;
   email: string;
+}
+
+export interface ContactDataPersonal extends ContactData {
   social: {
     facebook: string;
     instagram: string;
   };
 }
 
-interface PersonMetadata {
+export interface PersonMetadata {
   name: string; // full name
   nickname: string;
   firstName: string;
-  middleName?: string;
+  middleName: string | null;
   lastName: string;
-  nameSuffix: string;
+  nameSuffix: string | null;
   gender: 'Male' | 'Female';
   birthday: Date;
-  age: number;
+  // age: number | null;
   status: 'Enrollee' | 'Alumni';
-  grade?: number; // k-12 thing
-  enrollmentCycle?: EnrollmentCycle;
-  hgHub?: HomeschoolHub;
-  batch: number;
+  grade: number | null; // k-12 thing
+  enrollmentCycle: EnrollmentCycle | null;
+  hgHub: HomeschoolHub | null;
+  batch: number | null;
   address: string;
   contact: {
-    personal: Partial<ContactData>;
-    parent?: Partial<ContactData>;
+    personal: ContactDataPersonal;
+    parent: ContactData;
   };
   interests: string;
   clubs: Club[];
-  legacy?: LegacyData;
+  legacy: LegacyData | false;
   miscData: { [index: string]: any };
 }
 
-interface Person extends WithId<Document> {
-  _id: ObjectId;
+// PersonMetadata for GraphQL
+export interface RPersonMetadata extends PersonMetadata {
+  birthday: any;
+  age: number;
+  clubs: RClub[];
+}
+
+// include  extends WithId<Document>
+export interface Person {
   accountId: ObjectId;
   learnersId: string;
   metadata: PersonMetadata;
   socialIntegrations: {
     discord?: string;
   };
+}
+
+// Person for GraphQL
+export interface RPerson extends Person {
+  metadata: RPersonMetadata;
+}
+
+// include  extends WithId<Document>
+export interface Account {
+  personId: ObjectId;
+  learnersId: string;
+  username?: string;
+  email: {
+    personal: string;
+    parent: string | null;
+  };
+  hashword?: string;
+}
+
+export interface RawData {
+  Person: Person;
+  Account: Account;
 }

@@ -1,0 +1,132 @@
+type UnknownObject {
+  _: Boolean
+}
+
+type ContactDataSocial {
+  facebook: String
+  instagram: String
+}
+interface ContactData {
+  phone: String
+  email: String
+}
+type ContactDataPersonal implements ContactData {
+  phone: String
+  email: String
+  social: ContactDataSocial
+}
+type ContactDataParent implements ContactData {
+  phone: String
+  email: String
+}
+
+type PersonContactData {
+  personal: ContactDataPersonal
+  parent: ContactDataParent
+}
+
+type Club {
+  name: String!
+  url: String
+  logoUrl: String
+}
+
+type LegacyData {
+  level: Int
+  hub: String
+}
+
+type PersonMetadata {
+  name: String!
+  nickname: String!
+  firstName: String!
+  middleName: String
+  lastName: String!
+  nameSuffix: String
+  """
+  Returns either of the following:
+  | gender |
+  | --- |
+  | Male |
+  | Female |
+  """
+  gender: String!
+  birthday: String!
+  age: Int
+  status: String!
+  grade: Int
+  """
+  Returns either of the following:
+  | enrollmentCycle |
+  | --- |
+  | March |
+  | June |
+  | September |
+  | December |
+  """
+  enrollmentCycle: String
+  """
+  Returns either of the following:
+  | hgHub |
+  | --- |
+  | Main (Ortigas) |
+  | Middle East - Dubai |
+  | Middle East - Abu Dhabi |
+  | Middle East - Qatar |
+  | Middle East - Kingdom of Saudi Arabia |
+  | United Kingdom |
+  | Alabang |
+  | Bacolod |
+  | Baguio |
+  | Batangas |
+  | Cebu |
+  | Davao |
+  | General Santos |
+  | Imus |
+  | Palawan |
+  | Qatar |
+  | Roces |
+  """
+  hgHub: String
+  batch: Int
+  address: String!
+  contact: PersonContactData!
+  interests: String!
+  clubs: [Club]
+  legacy: LegacyData
+  miscData: UnknownObject
+}
+
+type PersonSocialIntegrations {
+  discord: String
+}
+type Person {
+  accountId: String!
+  learnersId: String!
+  metadata: PersonMetadata!
+  socialIntegrations: PersonSocialIntegrations!
+}
+
+type AccountEmail {
+  personal: String
+  parent: String
+}
+type Account {
+  personId: String!
+  learnersId: String!
+  username: String
+  email: AccountEmail
+  hashword: String
+}
+
+type Query {
+  Person(id: String, accountId: String, learnersId: String): Person
+  Account(
+    id: String
+    personId: String
+    learnersId: String
+    username: String
+    personalEmail: String
+    parentsEmail: String
+  ): Account
+}
