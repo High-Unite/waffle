@@ -24,17 +24,23 @@ export default async function routeWrapper() {
   const QuerySchema = readFileSync('./schema/graphql/Query.gql', {
     encoding: 'utf8',
   });
-  const exampleSchema = graphql.buildSchema(QuerySchema);
+  const MainSchema = graphql.buildSchema(QuerySchema);
 
   // query handlers
   const PersonQuery = async (query: {
     id: ObjectId;
-    accountId: ObjectId;
+    accountId: string;
     learnersId: string;
   }): Promise<RPerson | undefined> => {
     // get Person from ID
     const collection = database.collection<Person>('identity');
-    const personData = await collection.findOne(query);
+
+    const dbQuery: Partial<WithId<Person>> = {};
+    if (query.id) dbQuery._id = new ObjectId(query.id);
+    if (query.accountId) dbQuery.accountId = new ObjectId(query.accountId);
+    if (query.learnersId) dbQuery.learnersId = query.learnersId;
+
+    const personData = await collection.findOne(dbQuery);
 
     const getAge = (birthday: Date) => {
       const tNow = new Date().getTime(),
@@ -74,8 +80,8 @@ export default async function routeWrapper() {
     const collection = database.collection<Account>('account');
 
     const dbQuery: Partial<WithId<Account & { email: any }>> = { email: {} };
-    if (query.id) dbQuery._id = query.id;
-    if (query.personId) dbQuery.personId = query.personId;
+    if (query.id) dbQuery._id = new ObjectId(query.id);
+    if (query.personId) dbQuery.personId = new ObjectId(query.personId);
     if (query.learnersId) dbQuery.learnersId = query.learnersId;
     if (query.username) dbQuery.username = query.username;
     if (query.personalEmail) dbQuery.email.personal = query.personalEmail;
@@ -99,7 +105,7 @@ export default async function routeWrapper() {
   route.use(
     '/graphql',
     graphqlHTTP({
-      schema: exampleSchema,
+      schema: MainSchema,
       rootValue: { Person: PersonQuery, Account: AccountQuery },
       graphiql: true,
     })
